@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Application service
+  app:
+    build: .
+    container_name: pulikids-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+      - REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL service
+  db:
+    image: postgres:latest
+    container_name: pulikids-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=childcare
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"  # Change host port to 5434
+
+  # Redis service
+  redis:
+    image: redis:alpine
+    container_name: pulikids-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:
